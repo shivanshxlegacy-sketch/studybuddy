@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upgrade to Pro · StudyBuddy</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#fdf7ff;color:#1e1b3a;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:20px}
+.box{background:#fff;border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 10px 30px #0001}
+h1{margin:0 0 6px;font-size:22px}
+p{color:#6b6f8a;font-size:14px}
+button{width:100%;padding:13px;border:0;border-radius:10px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;margin-top:10px}
+#stripe{background:#635bff}#rzp{background:#072654}
+.msg{font-size:14px;margin-top:12px;color:#dc2626}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Upgrade to Pro</h1>
+  <p>Unlimited AI help for one student. Choose how to pay. Razorpay suits UPI and Indian cards. Stripe suits international cards.</p>
+  <button id="rzp">Pay with Razorpay (UPI, cards, netbanking)</button>
+  <button id="stripe">Pay with Stripe (cards)</button>
+  <div class="msg" id="msg"></div>
+  <p style="margin-top:14px"><a href="/app">Back to StudyBuddy</a></p>
+</div>
+<script>
+  const token = localStorage.getItem('sb_access_token');
+  if (!token) location.href = '/login';
+  async function pay(provider) {
+    document.getElementById('msg').textContent = '';
+    const r = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+      body: JSON.stringify({ provider })
+    });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const j = await r.json();
+    if (j.url) location.href = j.url;
+    else document.getElementById('msg').textContent = 'Payment could not start. Please try again.';
+  }
+  document.getElementById('rzp').onclick = () => pay('razorpay');
+  document.getElementById('stripe').onclick = () => pay('stripe');
+</script>
+</body>
+</html>

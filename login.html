@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in · StudyBuddy</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#fdf7ff;color:#1e1b3a;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:20px}
+.box{background:#fff;border-radius:20px;padding:28px;max-width:400px;width:100%;box-shadow:0 10px 30px #0001}
+h1{margin:0 0 6px;font-size:22px}
+p{color:#6b6f8a;font-size:14px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;margin:8px 0;box-sizing:border-box}
+button{width:100%;padding:12px;border:0;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+.msg{font-size:14px;margin-top:12px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <div id="step1">
+    <h1>Log in to StudyBuddy</h1>
+    <p>Enter your email. We will send you a sign-in link.</p>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+    <button id="go">Send sign-in link</button>
+    <div class="msg" id="msg"></div>
+  </div>
+  <div id="step2" class="hidden">
+    <h1>Parent or guardian consent</h1>
+    <p>StudyBuddy is for students, so a parent or guardian must agree before the student uses the AI. Enter their email. Read our <a href="/legal/privacy.html">privacy policy</a>.</p>
+    <input id="parent" type="email" placeholder="parent@example.com">
+    <label style="font-size:13px;display:block;margin:6px 0"><input type="checkbox" id="agree" style="width:auto;margin-right:6px">I am the parent or guardian, and I agree to the terms and privacy policy.</label>
+    <input id="code" placeholder="Class code from your teacher (optional)" style="text-transform:uppercase">
+    <button id="consent">Agree and continue</button>
+    <div class="msg" id="msg2"></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+  // Public values only. The anon key is safe in the browser; the service key is never here.
+  const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const $ = id => document.getElementById(id);
+
+  async function afterLogin(session) {
+    localStorage.setItem('sb_access_token', session.access_token);
+    const r = await fetch('/api/me', { headers: { authorization: 'Bearer ' + session.access_token } });
+    const me = r.ok ? await r.json() : {};
+    if (me.consent) { location.href = '/app'; return; }
+    $('step1').classList.add('hidden');
+    $('step2').classList.remove('hidden');
+  }
+  sb.auth.onAuthStateChange((event, session) => { if (session) afterLogin(session); });
+
+  $('go').onclick = async () => {
+    const email = $('email').value.trim();
+    if (!email) { $('msg').textContent = 'Please enter your email.'; return; }
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + '/login' } });
+    $('msg').textContent = error ? 'Could not send the link. Try again.' : 'Check your email for the sign-in link.';
+  };
+
+  $('consent').onclick = async () => {
+    const parentEmail = $('parent').value.trim();
+    if (!parentEmail || !$('agree').checked) { $('msg2').textContent = 'Enter a parent email and tick the box to continue.'; return; }
+    const token = localStorage.getItem('sb_access_token');
+    const h = { 'content-type': 'application/json', authorization: 'Bearer ' + token };
+    const r = await fetch('/api/consent', { method: 'POST', headers: h, body: JSON.stringify({ parentEmail }) });
+    if (!r.ok) { $('msg2').textContent = 'Could not save. Check the email and try again.'; return; }
+    const code = $('code').value.trim();
+    if (code) {
+      const j = await fetch('/api/join', { method: 'POST', headers: h, body: JSON.stringify({ code }) });
+      if (!j.ok) { $('msg2').textContent = 'That class code was not found. You can still continue.'; setTimeout(() => location.href = '/app', 1800); return; }
+    }
+    location.href = '/app';
+  };
+</script>
+</body>
+</html>

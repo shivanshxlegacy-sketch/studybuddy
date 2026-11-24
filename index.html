@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyBuddy AI</title>
+<style>
+:root{--bg:#fdf7ff;--side:#fff;--card:#fff;--ink:#1e1b3a;--muted:#6b6f8a;--line:#ece8f7;--tc:#7c3aed;--a2:#22c3a6;--chip:#f3efff;--bad:#e11d48;--good:#16a34a;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11102a;--side:#17153a;--card:#1d1a44;--ink:#f1efff;--muted:#a7a3cc;--line:#2d2963;--chip:#262262;--bad:#fb7185;--good:#4ade80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11102a;--side:#17153a;--card:#1d1a44;--ink:#f1efff;--muted:#a7a3cc;--line:#2d2963;--chip:#262262;--bad:#fb7185;--good:#4ade80;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;overflow:hidden}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.app{display:grid;grid-template-columns:290px 1fr;height:100vh;height:100dvh}
+.muted{color:var(--muted);font-size:13px}
+.lbl{font-size:12px;font-weight:800;color:var(--tc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+
+/* sidebar */
+aside{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px;gap:12px;min-height:0}
+.logo{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:18px}
+.logo .l{display:flex;align-items:center;gap:10px}
+.dot{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#f97316,#db2777,#7c3aed);display:grid;place-items:center;color:#fff;font-size:18px}
+.iconbtn{background:var(--chip);border:0;border-radius:10px;width:34px;height:34px;display:grid;place-items:center;font-size:15px;flex:none}
+.pcard2{display:flex;align-items:center;gap:10px;background:var(--tc);border-radius:16px;padding:10px 12px;color:#fff}
+.pcard2 .muted{color:#ffffffdd}
+.pav{width:42px;height:42px;border-radius:50%;background:#ffffff33;display:grid;place-items:center;font-size:24px;flex:none}
+.pav.sm{width:38px;height:38px;font-size:22px}
+.pcard2 .iconbtn{background:#ffffff33;color:#fff}
+.navs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.navs button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 4px;font-size:13px;font-weight:700;color:var(--muted)}
+.navs button.on{background:var(--tc);color:#fff;border-color:var(--tc)}
+.switch{width:100%;background:var(--chip);border:0;border-radius:12px;padding:8px;font-weight:700;font-size:13px}
+.newchat{background:var(--tc);color:#fff;border:0;border-radius:12px;padding:11px 14px;font-weight:800}
+.search{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;outline:none}
+.sec{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin:2px 0 4px}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{background:transparent;border:0;border-radius:9px;padding:6px 4px;font-size:13px;color:var(--muted);font-weight:700}
+.seg button.on{background:var(--tc);color:#fff}
+.history{flex:1;overflow:auto;display:flex;flex-direction:column;gap:3px;min-height:0}
+.hrow{display:flex;align-items:center;border-radius:10px}
+.hrow:hover,.hrow.on{background:var(--chip)}
+.hitem{flex:1;text-align:left;background:transparent;border:0;padding:9px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hdel{background:none;border:0;color:var(--muted);padding:4px 8px;opacity:0}
+.hrow:hover .hdel{opacity:1}
+.rewards{background:linear-gradient(135deg,#f97316,#db2777 50%,#7c3aed);border-radius:14px;padding:12px;color:#fff}
+.rw-top{display:flex;justify-content:space-between;align-items:center;font-weight:800;gap:8px}
+.rewards .muted{color:#ffffffdd}
+.bar{height:8px;background:#ffffff44;border-radius:8px;overflow:hidden;margin:8px 0 6px}
+.bar div{height:100%;width:0;background:#fff;transition:width .6s}
+
+/* main */
+main{display:flex;flex-direction:column;min-height:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 22px;border-bottom:1px solid var(--line);background:var(--bg)}
+.menu{display:none}
+.title{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.chat{flex:1;overflow:auto;padding:22px 20px 12px;min-height:0}
+.wrap{max-width:840px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.hero{text-align:center;padding:18px 8px}
+.hero h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+.hero>p{color:var(--muted);margin:0 auto;max-width:580px}
+.guide{margin:20px auto 0;max-width:720px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:left}
+.gstep{border-radius:16px;padding:14px;display:flex;gap:10px;color:#fff;background:var(--gc)}
+.gstep .n{flex:none;width:28px;height:28px;border-radius:50%;background:#fff3;display:grid;place-items:center;font-weight:800}
+.gstep b{display:block}
+.gstep .muted{color:#ffffffdd}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.chip{background:var(--card);border:2px solid var(--cc,var(--line));border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600}
+.msg{display:flex;gap:10px;animation:up .35s ease both}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.user{justify-content:flex-end}
+.av{width:36px;height:36px;border-radius:50%;flex:none;background:var(--tc);display:grid;place-items:center;font-size:18px}
+.ubub{background:linear-gradient(135deg,var(--tc),#db2777);color:#fff;padding:10px 14px;border-radius:18px 18px 4px 18px;max-width:78%}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;width:100%;min-width:0;border-top:4px solid var(--tc)}
+.ans{font-size:17px;font-weight:800;margin-bottom:10px}
+.concept{background:var(--chip);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px}
+.steps{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.step{display:flex;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;animation:up .4s ease both}
+.step .n{flex:none;width:26px;height:26px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--sc)}
+.step b{display:block}
+.practice{margin-top:10px;padding:10px 12px;border:2px dashed var(--tc);border-radius:12px;font-size:14px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.act{background:var(--chip);border:0;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700}
+.act.primary{background:var(--a2);color:#052e26}
+.act:disabled{opacity:.5;cursor:default}
+.typing{display:flex;gap:5px;padding:6px 2px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--tc);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{opacity:.25;transform:translateY(-3px)}}
+.err{color:var(--bad);font-size:14px}
+.codebox{margin-top:12px;background:var(--chip);border-radius:12px;padding:10px}
+.codebox textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);font-size:12px;color:var(--ink)}
+
+/* books */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar select,.toolbar input{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;outline:none}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.chcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px;border-top:5px solid var(--cc)}
+.chcard:hover{transform:translateY(-2px);box-shadow:0 8px 20px #0002}
+.chcard .no{font-size:12px;font-weight:800;color:var(--cc)}
+.chcard b{font-size:15px}
+.plan{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.day{border-radius:18px;padding:14px;color:#fff;background:var(--dc)}
+.day b{font-size:16px}
+.day ul{margin:8px 0 0;padding-left:18px}
+.day .muted{color:#ffffffdd}
+.notes li{margin:6px 0}
+.term{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.term b{min-width:110px;color:var(--tc)}
+
+/* composer */
+.composer{padding:10px 20px 14px;border-top:1px solid var(--line);background:var(--bg)}
+.mrow{max-width:840px;margin:0 auto 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mode{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;flex-wrap:wrap}
+.mode button{background:transparent;border:0;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--muted)}
+.mode button.on{background:var(--tc);color:#fff}
+.mhint{font-size:13px;color:var(--muted)}
+.box{max-width:840px;margin:0 auto;background:var(--card);border:2px solid var(--tc);border-radius:20px;padding:8px 8px 8px 10px;display:flex;flex-direction:column;gap:6px}
+.prev{display:none;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:4px}
+.prev.on{display:flex}
+.prev img{width:44px;height:44px;object-fit:cover;border-radius:8px}
+.prev button{background:none;border:0;color:var(--muted)}
+.row{display:flex;align-items:flex-end;gap:8px}
+textarea.in{flex:1;border:0;background:transparent;resize:none;max-height:140px;padding:8px 4px;outline:none;font-size:15px}
+.ibtn{background:var(--chip);border:0;border-radius:12px;width:40px;height:40px;display:grid;place-items:center;font-size:16px;flex:none}
+.ibtn.rec{background:var(--bad);color:#fff}
+.send{background:var(--tc);color:#fff;border:0;border-radius:12px;width:42px;height:42px;display:grid;place-items:center;font-size:16px;flex:none}
+.send:disabled{opacity:.4}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:rgba(10,8,30,.6);display:none;align-items:center;justify-content:center;padding:14px;z-index:30}
+.overlay.on{display:flex}
+.dlg{width:min(700px,100%);background:var(--card);border-radius:22px;overflow:hidden;border:1px solid var(--line);max-height:94vh;display:flex;flex-direction:column}
+.dlg .head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);font-weight:800}
+.dlg .body{padding:18px;overflow:auto}
+.big{background:var(--tc);color:#fff;border:0;border-radius:12px;padding:10px 18px;font-weight:800}
+.big.good{background:var(--a2);color:#052e26}
+.ghostbtn{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:700}
+.ghostbtn.danger{color:var(--bad)}
+.frow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.frow .ghostbtn:first-child{margin-right:auto}
+
+/* wizard / profiles */
+.gate{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:18px;background:linear-gradient(135deg,#f97316,#db2777 40%,#7c3aed 75%,#0891b2);overflow:auto}
+.gate.on{display:flex}
+.gbox{width:min(780px,100%);background:var(--card);border-radius:24px;padding:24px;color:var(--ink)}
+.gtitle{font-size:24px;font-weight:900;margin-bottom:4px;letter-spacing:-.01em}
+.gsub{color:var(--muted);margin-bottom:14px}
+.steps3{display:flex;gap:6px;margin-bottom:16px}
+.steps3 i{flex:1;height:6px;border-radius:6px;background:var(--line)}
+.steps3 i.on{background:var(--tc)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.pcard{background:var(--card);border:2px solid var(--tc,var(--line));border-radius:18px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;color:var(--ink);border-top:6px solid var(--tc,var(--line))}
+.pcard .pav{width:64px;height:64px;font-size:40px;background:var(--chip)}
+.pcard.add{border-style:dashed;border-top-style:dashed}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .full{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:13px}
+label input,label select,label textarea{display:block;width:100%;margin-top:5px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;outline:none;font-weight:500}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.checks label{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:600;font-size:13px;cursor:pointer}
+.checks label:has(input:checked){background:var(--chip);border-color:var(--tc)}
+.checks input{width:auto;margin:0}
+.lab{font-weight:800;margin:14px 0 8px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.tcard{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:2px;color:var(--ink)}
+.tcard.on{border-color:var(--tc);background:linear-gradient(135deg,var(--tc)22,transparent)}
+.temo{font-size:30px}
+.avgrid{display:flex;flex-wrap:wrap;gap:8px}
+.avb{width:48px;height:48px;border-radius:50%;background:var(--bg);border:2px solid var(--line);font-size:24px}
+.avb.on{border-color:var(--tc);background:var(--chip)}
+
+/* animated video */
+.vstage{position:relative;min-height:320px;padding:26px;color:#fff;overflow:hidden;background:linear-gradient(120deg,var(--tc),#1e1b3a,#db2777);background-size:300% 300%;animation:shift 10s ease infinite;display:flex;flex-direction:column;justify-content:center}
+@keyframes shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.vstage .dots{position:absolute;inset:0;pointer-events:none}
+.vstage .dots span{position:absolute;width:10px;height:10px;border-radius:50%;background:#ffffff55;animation:float 6s linear infinite}
+@keyframes float{from{transform:translateY(120%)}to{transform:translateY(-140%)}}
+.scene{display:flex;gap:18px;align-items:center;animation:in .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes in{from{opacity:0;transform:translateX(40px) scale(.96)}to{opacity:1;transform:none}}
+.bigemo{font-size:84px;line-height:1;flex:none;animation:pop 2.2s ease-in-out infinite}
+@keyframes pop{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.12) rotate(4deg)}}
+.vtxt .num{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+.vtxt h3{font-size:26px;margin:6px 0 8px;line-height:1.2}
+.vtxt p{margin:0;font-size:16px;max-width:520px}
+.tutor{position:absolute;right:16px;bottom:10px;font-size:40px;animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.vbar,.pbar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin:10px 0}
+.vbar div,.pbar div{height:100%;background:linear-gradient(90deg,var(--tc),var(--a2));width:0;transition:width .4s}
+.qn{font-size:13px;font-weight:800;color:var(--tc);text-transform:uppercase}
+.qtext{font-size:19px;margin:6px 0 14px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:11px 12px}
+.opt.sel{border-color:var(--tc);background:var(--chip)}
+.opt.ok{border-color:var(--good);background:#16a34a22}
+.opt.no{border-color:var(--bad);background:#e11d4822}
+.ol{width:28px;height:28px;border-radius:50%;background:var(--tc);color:#fff;display:grid;place-items:center;font-weight:800;flex:none;font-size:13px}
+.pnav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+.res{text-align:center;padding:8px 0 4px}
+.bigscore{font-size:48px;font-weight:900;color:var(--tc);line-height:1}
+.vs{font-weight:800;font-size:17px;margin-top:8px}
+.ptsearn{display:inline-block;margin-top:8px;background:var(--a2);color:#052e26;border-radius:999px;padding:4px 12px;font-weight:800}
+.rev{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.rq{border-radius:12px;padding:10px 12px;border-left:5px solid var(--bad);background:var(--bg);font-size:14px}
+.rq.okr{border-left-color:var(--good)}
+.expl{color:var(--muted);font-size:13px}
+.timer{font-weight:900;background:var(--chip);padding:4px 12px;border-radius:999px;color:var(--tc)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,160px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:700;transition:transform .35s;z-index:60;max-width:90vw;text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.scrim{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 auto 0 0;width:300px;z-index:20;transform:translateX(-100%);transition:transform .25s;box-shadow:0 0 40px #0006}
+  aside.open{transform:none}
+  .scrim.on{display:block;position:fixed;inset:0;background:#0006;z-index:15}
+  .menu{display:grid}
+  .guide{grid-template-columns:1fr}
+  .ubub{max-width:90%}
+  .hero h1{font-size:24px}
+  .hdel{opacity:1}
+  .fgrid{grid-template-columns:1fr}
+  .scene{flex-direction:column;text-align:center}
+  .bigemo{font-size:64px}
+}
+.fc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.fc summary{font-weight:700;cursor:pointer}.fc div{margin-top:8px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- student information form -->
+<div class="gate" id="gate"><div class="gbox" id="gateBody"></div></div>
+
+<div class="app">
+  <aside id="side">
+    <div class="logo">
+      <div class="l"><span class="dot">✦</span>StudyBuddy</div>
+      <button class="iconbtn" id="helpBtn" title="How to use" aria-label="How to use">?</button>
+    </div>
+    <div class="pcard2" id="pCard"></div>
+    <div class="navs">
+      <button data-v="chat" class="on">💬 Chat</button>
+      <button data-v="books">📚 Books</button>
+      <button data-v="plan">🗓️ Plan</button>
+      <button data-v="review">🧠 Review</button>
+    </div>
+    <button class="switch" id="switchP">👥 Switch student</button>
+    <div class="history-wrap" id="histWrap" style="display:flex;flex-direction:column;gap:12px;min-height:0;flex:1">
+      <button class="newchat" id="newChat">＋ New chat</button>
+      <input class="search" id="search" placeholder="🔍 Search chats">
+      <div>
+        <div class="sec">Difficulty</div>
+        <div class="seg" id="diff">
+          <button data-d="Easy">Easy</button><button data-d="Medium">Medium</button>
+          <button data-d="Hard">Hard</button><button data-d="Board Topper">Board Topper</button>
+        </div>
+      </div>
+      <div class="sec">Recent chats</div>
+      <div class="history" id="history"></div>
+    </div>
+    <div class="rewards">
+      <div class="rw-top"><span id="lvlName"></span><span id="ptsTxt"></span></div>
+      <div class="bar"><div id="bar"></div></div>
+      <div class="muted" id="nextTxt"></div>
+      <div class="muted" id="streakTxt"></div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main>
+    <div class="topbar">
+      <button class="iconbtn menu" id="menuBtn" aria-label="Menu">☰</button>
+      <div class="title" id="viewTitle">Chat</div>
+      <button class="iconbtn" id="focusBtn" title="Focus timer" aria-label="Focus timer">⏱</button>
+      <div class="pill" id="ptsPill"></div>
+    </div>
+    <div class="chat" id="chat"><div class="wrap" id="wrap"></div></div>
+
+    <div class="composer" id="composer">
+      <div class="mrow">
+        <div class="mode" id="mode">
+          <button data-m="ask">💬 Ask</button>
+          <button data-m="quiz">📝 Quiz</button>
+          <button data-m="paper">🏅 Exam paper</button>
+          <button data-m="challenge">⚔️ Challenge friend</button>
+        </div>
+        <span class="mhint" id="modeHint"></span>
+      </div>
+      <div class="box">
+        <div class="prev" id="prev"><img id="prevImg" alt=""><span id="prevName"></span><button id="prevX" aria-label="Remove photo">✕</button></div>
+        <div class="row">
+          <button class="ibtn" id="attach" title="Upload a photo" aria-label="Upload photo">📷</button>
+          <input type="file" id="file" accept="image/*" hidden>
+          <textarea class="in" id="input" rows="1"></textarea>
+          <button class="ibtn hidden" id="mic" title="Speak" aria-label="Voice input">🎤</button>
+          <button class="send" id="send" aria-label="Send">➤</button>
+        </div>
+      </div>
+      <div class="hint">StudyBuddy can make mistakes. Check answers with your teacher or the NCERT textbook.</div>
+    </div>
+  </main>
+</div>
+
+<!-- help -->
+<div class="overlay" id="helpM">
+  <div class="dlg">
+    <div class="head"><span>How to use StudyBuddy</span><button class="iconbtn" id="helpX" aria-label="Close">✕</button></div>
+    <div class="body">
+      <p><b>📚 Books:</b> pick your subject to see the chapters. Open a chapter for notes, a sample paper, an animated video, or help solving an exercise.</p>
+      <p><b>🗓️ Plan:</b> get a 7-day study plan made for your goals, time, and weak topics.</p>
+      <p><b>💬 Chat:</b> ask a question or upload a photo. Get the answer, then 🪜 steps, 🎬 video, or 🔊 read aloud.</p>
+      <p><b>📝 Quiz / 🏅 Exam paper / ⚔️ Challenge:</b> test yourself, take a timed paper, or challenge a friend with a code.</p>
+      <p><b>✏️ Your info:</b> tap the pencil on your profile card to update your details, goals, and teacher.</p>
+    </div>
+  </div>
+</div>
+
+<!-- chapter -->
+<div class="overlay" id="chapM">
+  <div class="dlg">
+    <div class="head"><span id="chTitle"></span><button class="iconbtn" id="chX" aria-label="Close">✕</button></div>
+    <div class="body">
+      <div class="acts" id="chActs" style="margin-top:0"></div>
+      <div id="chOut" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- animated video -->
+<div class="overlay" id="vidM">
+  <div class="dlg">
+    <div class="head"><span id="vHead">🎬 Video lesson</span><button class="iconbtn" id="vClose" aria-label="Close">✕</button></div>
+    <div class="body" style="padding:0">
+      <div class="vstage" id="vstage"><div class="dots" id="vdots"></div><div id="scene"></div><div class="tutor" id="tutorEmo" aria-hidden="true"></div></div>
+      <div style="padding:14px 18px">
+        <div class="vbar"><div id="vprog"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act primary" id="vPlay">▶ Play</button>
+          <button class="act" id="vPrev">⏮ Back</button>
+          <button class="act" id="vNext">⏭ Next</button>
+          <button class="act" id="vRestart">↺ Restart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- quiz / paper / challenge player -->
+<div class="overlay" id="playerM">
+  <div class="dlg">
+    <div class="head"><span id="pTitle"></span><div style="display:flex;gap:8px;align-items:center"><span class="timer hidden" id="pTimer"></span><button class="iconbtn" id="pX" aria-label="Close">✕</button></div></div>
+    <div class="body" id="pBody"></div>
+  </div>
+</div>
+
+<div class="overlay" id="focusM"><div class="dlg">
+  <div class="head"><span>⏱ Focus session</span><button class="iconbtn" id="focusX" aria-label="Close">✕</button></div>
+  <div class="body" style="text-align:center">
+    <div id="focusTime" style="font-size:64px;font-weight:900;color:var(--tc)">25:00</div>
+    <p class="muted">Study one topic with no distractions. Each full session earns 10 points, up to 3 a day.</p>
+    <div class="frow" style="justify-content:center"><button class="big" id="focusStart">Start 25 min</button><button class="ghostbtn" id="focusStop">Reset</button></div>
+  </div></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="/shim.js"></script>
+<script>
+(() => {
+  const KEY='studybuddy-v5', OLD4='studybuddy-v4', OLD3='studybuddy-v3';
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const nl=s=>esc(s).replace(/\n/g,'<br>');
+  const uid=()=>Math.random().toString(36).slice(2,9);
+  const today=()=>new Date().toISOString().slice(0,10);
+  const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)};
+
+  const TEACHERS=[
+    {id:'asha',name:'Ms. Asha',emoji:'👩‍🏫',color:'#f97316',style:'warm, patient and encouraging, using everyday examples',blurb:'Warm & patient'},
+    {id:'arjun',name:'Mr. Arjun',emoji:'👨‍🏫',color:'#2563eb',style:'energetic and fun, using quick tricks and mnemonics',blurb:'Energetic & fun'},
+    {id:'meera',name:'Dr. Meera',emoji:'👩‍🔬',color:'#16a34a',style:'curious and science-minded, always explaining the why',blurb:'Curious & scientific'},
+    {id:'kabir',name:'Prof. Kabir',emoji:'🧔',color:'#7c3aed',style:'precise and disciplined, focused on exam technique and marks',blurb:'Precise & exam-smart'},
+    {id:'zara',name:'Ms. Zara',emoji:'👩‍🎨',color:'#db2777',style:'a creative storyteller who teaches through stories and pictures',blurb:'Creative storyteller'},
+    {id:'ravi',name:'Coach Ravi',emoji:'🏃',color:'#0891b2',style:'a motivating sports coach who sets goals and celebrates progress',blurb:'Motivating coach'}
+  ];
+  const AVATARS=['🦊','🐼','🦁','🐯','🐸','🦄','🐧','🐨','🐙','🦉'];
+  const SUBJECTS=['Maths','Science','English','Social Studies','Hindi','Computer Science','Other'];
+  const BOARDS=['CBSE (NCERT)','State board','ICSE','Other'];
+  const LANGS=['English','Hindi','Hinglish'];
+  const GOALS=['Understand concepts','Exam practice','Homework help','Revision before exams'];
+  const STYLES=['Visual (pictures & diagrams)','Reading (notes & points)','Listening (stories & talk)','Practice (lots of questions)'];
+  const TARGETS=['60','75','90','95'];
+  const MINS=['20','40','60','90'];
+  const LEVELS=[{at:0,name:'Newcomer',icon:'🌱'},{at:50,name:'Bronze Learner',icon:'🥉'},{at:150,name:'Silver Scholar',icon:'🥈'},{at:300,name:'Gold Genius',icon:'🥇'},{at:500,name:'Champion',icon:'🏆'}];
+  const DIFF={'Easy':'basic recall and simple examples','Medium':'understanding and everyday application','Hard':'multi-step problems','Board Topper':'exam-level higher-order questions like those top board scorers face'};
+  const COLS=['#f97316','#2563eb','#16a34a','#7c3aed','#db2777','#0891b2','#ca8a04'];
+  const EMO=['🎯','💡','🧩','🔍','✅','🏁','🌟','📌'];
+
+  const newProfile=o=>Object.assign({id:uid(),name:'Student',cls:'5',avatar:'🦊',teacher:'asha',subject:'Maths',diff:'Medium',mode:'ask',view:'chat',points:0,reached:[],streak:0,lastDay:'',quizzes:0,chats:[],books:{},plan:null,info:{}},o);
+  let S={profiles:{},cur:null};
+  try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+  // one-time import from earlier versions
+  if(!Object.keys(S.profiles).length){
+    for(const k of [OLD4,OLD3]){
+      try{
+        const raw=localStorage.getItem(k); if(!raw)continue;
+        if(k===OLD4){const o=JSON.parse(raw);Object.values(o.profiles||{}).forEach(p=>{const np=newProfile(Object.assign({},p,{id:uid()}));S.profiles[np.id]=np});if(Object.keys(S.profiles).length){S.cur=Object.keys(S.profiles)[0];save();break}}
+        else{const o=JSON.parse(raw);const p=newProfile({name:'Student',cls:o.cls||'5',subject:o.subject||'Maths',points:o.points||0,reached:o.reached||[],streak:o.streak||0,lastDay:o.lastDay||'',quizzes:o.quizzes||0,chats:o.chats||[]});S.profiles[p.id]=p;S.cur=p.id;save();break}
+      }catch(e){}
+    }
+  }
+  const P=()=>S.profiles[S.cur];
+  const teacherOf=p=>TEACHERS.find(t=>t.id===p.teacher)||TEACHERS[0];
+  const T=()=>teacherOf(P());
+  const INFO=()=>P().info||{};
+
+  let sample=null, dict=null, file=null, busy=false, searchQ='', Q=null, qTick=null, vTok=0, W=null;
+
+  // ---------- student information form (3 steps) ----------
+  function openWizard(id){
+    const p=id?S.profiles[id]:null;
+    const i=p?p.info||{}:{};
+    W={step:0,id:id||null,d:{
+      name:p?p.name:'', cls:p?p.cls:'5', avatar:p?p.avatar:'🦊', teacher:p?p.teacher:'asha',
+      board:i.board||BOARDS[0], lang:i.lang||'English', subjects:i.subjects||['Maths','Science'],
+      target:i.target||'75', examDate:i.examDate||'', mins:i.mins||'40', weak:i.weak||'',
+      style:i.style||STYLES[0], goal:i.goal||GOALS[0], notes:i.notes||''
+    }};
+    $('gate').classList.add('on');
+    paintWiz();
+  }
+  function readWiz(){
+    const g=id=>$(id)?$(id):null;
+    const d=W.d;
+    if(g('fName'))d.name=g('fName').value.trim();
+    if(g('fCls'))d.cls=g('fCls').value;
+    if(g('fBoard'))d.board=g('fBoard').value;
+    if(g('fLang'))d.lang=g('fLang').value;
+    if(g('fTarget'))d.target=g('fTarget').value;
+    if(g('fDate'))d.examDate=g('fDate').value;
+    if(g('fMins'))d.mins=g('fMins').value;
+    if(g('fWeak'))d.weak=g('fWeak').value.trim();
+    if(g('fStyle'))d.style=g('fStyle').value;
+    if(g('fGoal'))d.goal=g('fGoal').value;
+    if(g('fNotes'))d.notes=g('fNotes').value.trim();
+    if(g('fSubs'))d.subjects=[...document.querySelectorAll('#fSubs input:checked')].map(x=>x.value);
+  }
+  const sel=(id,opts,val,fmt=x=>x)=>`<select id="${id}">${opts.map(o=>`<option value="${esc(o)}" ${String(o)===String(val)?'selected':''}>${esc(fmt(o))}</option>`).join('')}</select>`;
+  function paintWiz(){
+    const d=W.d, steps=['About you','Your goals','Your learning'];
+    let body='';
+    if(W.step===0){
+      body=`<div class="fgrid">
+        <label class="full">Student name<input id="fName" value="${esc(d.name)}" maxlength="24" placeholder="e.g. Aarav"></label>
+        <label>Class<select id="fCls">${Array.from({length:12},(_,k)=>`<option value="${k+1}" ${String(k+1)===String(d.cls)?'selected':''}>Class ${k+1}</option>`).join('')}</select></label>
+        <label>Board<select id="fBoard">${BOARDS.map(b=>`<option ${b===d.board?'selected':''}>${esc(b)}</option>`).join('')}</select></label>
+        <label class="full">Language for explanations<select id="fLang">${LANGS.map(l=>`<option ${l===d.lang?'selected':''}>${esc(l)}</option>`).join('')}</select></label>
+        <div class="full"><div class="lab" style="margin-top:0">Choose your avatar</div><div class="avgrid">${AVATARS.map(a=>`<button class="avb ${a===d.avatar?'on':''}" data-av="${a}">${a}</button>`).join('')}</div></div>
+      </div>`;
+    }else if(W.step===1){
+      body=`<div class="lab" style="margin-top:0">Which subjects are you studying?</div>
+        <div class="checks" id="fSubs">${SUBJECTS.map(s=>`<label><input type="checkbox" value="${esc(s)}" ${d.subjects.includes(s)?'checked':''}>${esc(s)}</label>`).join('')}</div>
+        <div class="fgrid" style="margin-top:14px">
+          <label>Target score (%)<select id="fTarget">${TARGETS.map(t=>`<option ${t===d.target?'selected':''} value="${t}">${t}%</option>`).join('')}</select></label>
+          <label>Next exam date<input type="date" id="fDate" value="${esc(d.examDate)}"></label>
+          <label>Study time per day (minutes)<select id="fMins">${MINS.map(m=>`<option ${m===d.mins?'selected':''} value="${m}">${m} min</option>`).join('')}</select></label>
+          <label>Main goal<select id="fGoal">${GOALS.map(g=>`<option ${g===d.goal?'selected':''}>${esc(g)}</option>`).join('')}</select></label>
+          <label class="full">Topics you find hard (optional)<textarea id="fWeak" rows="2" placeholder="e.g. fractions, chemical reactions, tenses">${esc(d.weak)}</textarea></label>
+        </div>`;
+    }else{
+      body=`<div class="lab" style="margin-top:0">Choose an AI teacher for this student</div>
+        <div class="tgrid">${TEACHERS.map(t=>`<button class="tcard ${t.id===d.teacher?'on':''}" data-t="${t.id}" style="--tc:${t.color}"><span class="temo">${t.emoji}</span><b>${t.name}</b><span class="muted">${esc(t.blurb)}</span></button>`).join('')}</div>
+        <div class="fgrid" style="margin-top:14px">
+          <label>How do you learn best?<select id="fStyle">${STYLES.map(s=>`<option ${s===d.style?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
+          <label>Anything else we should know? (optional)<textarea id="fNotes" rows="2" placeholder="e.g. I get nervous in tests">${esc(d.notes)}</textarea></label>
+        </div>`;
+    }
+    const last=W.step===2;
+    $('gateBody').innerHTML=`<div class="gtitle">${W.id?'✏️ Edit student info':'✨ Tell us about the student'}</div>
+      <div class="gsub">Step ${W.step+1} of 3 · ${steps[W.step]}. This helps StudyBuddy teach in the way that suits this student.</div>
+      <div class="steps3">${steps.map((_,k)=>`<i class="${k<=W.step?'on':''}"></i>`).join('')}</div>
+      ${body}
+      <div class="frow"><button class="ghostbtn" id="wCancel">${S.cur&&P()?'Cancel':'Back'}</button>${W.id?'<button class="ghostbtn danger" id="wDel">Delete</button>':''}${W.step>0?'<button class="ghostbtn" id="wPrev">← Previous</button>':''}<button class="big" id="wNext">${last?(W.id?'Save changes':'Create profile'):'Next →'}</button></div>`;
+    $('gateBody').querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{readWiz();d.avatar=b.dataset.av;paintWiz()});
+    $('gateBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{readWiz();d.teacher=b.dataset.t;paintWiz()});
+    $('wCancel').onclick=()=>{if(S.cur&&P())$('gate').classList.remove('on');else gateList()};
+    if($('wPrev'))$('wPrev').onclick=()=>{readWiz();W.step--;paintWiz()};
+    if($('wDel'))$('wDel').onclick=()=>{
+      if(!confirm('Delete this student profile and all their chats, books and plans?'))return;
+      delete S.profiles[W.id]; if(S.cur===W.id)S.cur=null; save();
+      if(Object.keys(S.profiles).length)gateList(); else openWizard(null);
+    };
+    $('wNext').onclick=()=>{
+      readWiz();
+      if(W.step===1&&!d.subjects.length){toast('Please choose at least one subject');return}
+      if(!last){W.step++;paintWiz();return}
+      finishWiz();
+    };
+  }
+  function finishWiz(){
+    const d=W.d;
+    const info={board:d.board,lang:d.lang,subjects:d.subjects,target:d.target,examDate:d.examDate,mins:d.mins,weak:d.weak,style:d.style,goal:d.goal,notes:d.notes};
+    if(W.id){
+      const p=S.profiles[W.id];
+      Object.assign(p,{name:d.name||'Student',cls:d.cls,avatar:d.avatar,teacher:d.teacher,info,subject:d.subjects[0]||p.subject});
+      save(); $('gate').classList.remove('on'); if(S.cur===W.id)renderAll(); else pick(W.id);
+    }else{
+      const p=newProfile({name:d.name||'Student',cls:d.cls,avatar:d.avatar,teacher:d.teacher,info,subject:d.subjects[0]||'Maths'});
+      S.profiles[p.id]=p; save(); pick(p.id); toast(`Welcome, ${p.name}! ${teacherOf(p).emoji} ${teacherOf(p).name} is ready.`);
+    }
+  }
+  function gateList(){
+    const ids=Object.keys(S.profiles);
+    $('gate').classList.add('on');
+    $('gateBody').innerHTML=`<div class="gtitle">👋 Who is studying today?</div><div class="gsub">Each student has their own details, teacher, chats, books and plan.</div>
+      <div class="pgrid">${ids.map(id=>{const p=S.profiles[id],t=teacherOf(p);return `<button class="pcard" data-id="${id}" style="--tc:${t.color}"><div class="pav">${p.avatar}</div><b>${esc(p.name)}</b><span class="muted">Class ${esc(p.cls)} · ${t.emoji} ${esc(t.name)}</span><span class="muted">⭐ ${p.points} pts</span></button>`}).join('')}
+      <button class="pcard add" id="addP"><div class="pav">＋</div><b>Add student</b><span class="muted">Create a profile</span></button></div>`;
+    $('gateBody').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>pick(b.dataset.id));
+    $('addP').onclick=()=>openWizard(null);
+  }
+  function pick(id){S.cur=id;save();$('gate').classList.remove('on');closeSide();renderAll()}
+  $('switchP').onclick=()=>gateList();
+
+  // ---------- chats ----------
+  const chat=()=>P().chats.find(c=>c.id===P().cur);
+  function newChat(){const c={id:uid(),title:'New chat',msgs:[]};P().chats.unshift(c);P().cur=c.id;P().view='chat';save();renderAll();closeSide()}
+  function ensureChat(){if(!chat())newChat();return chat()}
+  function deleteChat(id){
+    if(!confirm('Delete this chat?'))return;
+    const p=P(); p.chats=p.chats.filter(c=>c.id!==id);
+    if(p.cur===id)p.cur=p.chats[0]?p.chats[0].id:null;
+    save();renderAll();
+  }
+  $('viewTitle').ondblclick=()=>{const c=chat();if(!c||P().view!=='chat')return;const n=prompt('Rename this chat:',c.title);if(n&&n.trim()){c.title=n.trim().slice(0,60);save();renderAll()}};
+
+  // ---------- rewards ----------
+  function touchDay(){
+    const p=P(), t=today(); if(p.lastDay===t)return;
+    p.streak=p.lastDay===yest()?p.streak+1:1; p.lastDay=t; p.points+=5;
+    setTimeout(()=>toast(`🔥 ${p.streak}-day streak! +5 daily bonus`),1800);
+  }
+  function award(n,msg){
+    if(n<=0)return;
+    const p=P(); touchDay(); p.points+=n;
+    const up=LEVELS.filter(l=>l.at>0&&p.points>=l.at&&!p.reached.includes(l.at));
+    up.forEach(l=>p.reached.push(l.at)); save(); renderPoints();
+    const top=up[up.length-1];
+    toast(top?`🎉 Level up! ${top.icon} ${top.name}`:`+${n} pts · ${msg}`);
+  }
+  function renderPoints(){
+    const p=P(); if(!p)return;
+    const l=LEVELS.filter(x=>p.points>=x.at).pop(), nx=LEVELS.find(x=>x.at>p.points);
+    $('ptsPill').textContent=`⭐ ${p.points} pts`;
+    $('ptsTxt').textContent=`${p.points} pts`;
+    $('lvlName').textContent=`${l.icon} ${l.name}`;
+    $('bar').style.width=nx?`${((p.points-l.at)/(nx.at-l.at))*100}%`:'100%';
+    $('nextTxt').textContent=nx?`${nx.at-p.points} pts to ${nx.name}`:'Top level reached 🏆';
+    $('streakTxt').textContent=`🔥 ${p.streak} day streak · ${p.quizzes} tests taken`;
+  }
+  let tt;
+  function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+
+  // ---------- render shell ----------
+  function renderSide(){
+    const p=P(), t=T();
+    document.documentElement.style.setProperty('--tc',t.color);
+    const i=p.info||{};
+    $('pCard').innerHTML=`<div class="pav sm">${p.avatar}</div><div style="min-width:0;flex:1"><b>${esc(p.name)}</b><div class="muted">Class ${esc(p.cls)} · ${t.emoji} ${esc(t.name)}</div><div class="muted">Target ${esc(i.target||'—')}%</div></div><button class="iconbtn" id="editP" title="Edit student info" aria-label="Edit student info">✏️</button>`;
+    $('editP').onclick=()=>openWizard(p.id);
+    const q=searchQ.toLowerCase();
+    const list=p.chats.filter(c=>!q||c.title.toLowerCase().includes(q)||c.msgs.some(m=>(m.text||'').toLowerCase().includes(q)));
+    $('history').innerHTML=list.map(c=>`<div class="hrow ${c.id===p.cur&&p.view==='chat'?'on':''}"><button class="hitem" data-id="${c.id}">${esc(c.title)}</button><button class="hdel" data-del="${c.id}" aria-label="Delete chat">🗑</button></div>`).join('')||`<div class="muted" style="padding:6px">${q?'No chats match':'No chats yet'}</div>`;
+    $('history').querySelectorAll('.hitem').forEach(b=>b.onclick=()=>{P().cur=b.dataset.id;P().view='chat';save();renderAll();closeSide()});
+    $('history').querySelectorAll('.hdel').forEach(b=>b.onclick=()=>deleteChat(b.dataset.del));
+    document.querySelectorAll('#diff button').forEach(b=>b.classList.toggle('on',b.dataset.d===p.diff));
+    document.querySelectorAll('.navs button').forEach(b=>b.classList.toggle('on',b.dataset.v===p.view));
+    $('histWrap').classList.toggle('hidden',p.view!=='chat');
+    $('composer').classList.toggle('hidden',p.view!=='chat');
+  }
+  function paintMode(){
+    const p=P();
+    if(p.mode==='any')p.mode='ask';
+    document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===p.mode));
+    const hints={ask:'Ask a question or upload a photo.',any:'Ask about anything in the world. Current news and prices are looked up on the web.',quiz:'Type a topic (or upload a photo) for a 5-question quiz.',paper:'Type a topic for a 10-question timed exam paper.',challenge:'Type a topic to make a challenge, or paste a friend’s SB1 code.'};
+    $('modeHint').textContent=hints[p.mode];
+    $('input').placeholder={ask:'Ask anything about your homework…',any:'Ask any question…',quiz:'e.g. Fractions, water cycle…',paper:'e.g. Light: reflection and refraction',challenge:'Topic to challenge a friend, or paste a code…'}[p.mode];
+    $('mode').style.setProperty('--tc',T().color);
+  }
+  function renderChat(){
+    const c=chat(), w=$('wrap');
+    $('viewTitle').textContent=c?c.title:'Chat';
+    if(!c||!c.msgs.length){
+      const p=P(), t=T();
+      const cols=COLS;
+      const steps=['Open 📚 Books and pick a chapter','Ask or snap a photo','Stuck? Get steps or a video','Check yourself with a quiz or paper'];
+      const tips=['Open the chapter to see notes and a sample paper.','Type, speak with 🎤, or upload with 📷.','Tap 🪜 Step-by-step or 🎬 Tutor video.','Switch to 📝 Quiz or 🏅 Exam paper.'];
+      w.innerHTML=`<div class="hero"><h1>Hi ${esc(p.name)}! ${t.emoji}</h1>
+        <p>${esc(t.name)} is ready to help. Here is how to start.</p>
+        <div class="guide">${steps.map((s,k)=>`<div class="gstep" style="--gc:${cols[k]}"><div class="n">${k+1}</div><div><b>${s}</b><span class="muted">${tips[k]}</span></div></div>`).join('')}</div>
+        <div class="chips">
+          <button class="chip" style="--cc:#f97316" data-q="Solve: 2x + 5 = 17">🧮 Solve 2x + 5 = 17</button>
+          <button class="chip" style="--cc:#16a34a" data-q="Explain photosynthesis simply">🔬 Photosynthesis</button>
+          <button class="chip" style="--cc:#db2777" data-m="quiz" data-q="Fractions">📝 Quiz: fractions</button>
+          <button class="chip" style="--cc:#2563eb" data-m="paper" data-q="Light: reflection and refraction">🏅 Exam paper: light</button>
+          <button class="chip" style="--cc:#7c3aed" data-m="challenge" data-q="Multiplication tables">⚔️ Challenge: tables</button>
+        </div></div>`;
+      w.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{if(b.dataset.m){P().mode=b.dataset.m;save();paintMode()}$('input').value=b.dataset.q;$('input').focus()});
+      return;
+    }
+    w.innerHTML=c.msgs.map((m,i)=>m.role==='user'?userHTML(m):m.role==='result'?resultHTML(m):aiHTML(m,i)).join('');
+    w.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>act(b.dataset.a,+b.dataset.i));
+    w.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(b.dataset.copy));
+    $('chat').scrollTop=$('chat').scrollHeight;
+  }
+  const av=()=>`<div class="av">${T().emoji}</div>`;
+  function userHTML(m){return `<div class="msg user"><div class="ubub">${m.img?'<div style="opacity:.9;font-size:13px">📷 Photo attached</div>':''}${nl(m.text)}</div></div>`}
+  function resultHTML(m){return `<div class="msg"><div class="av">🏁</div><div class="card"><div class="lbl">${esc(m.title)}</div><div class="ans">${esc(m.line)}</div>${m.code?`<div class="codebox"><div class="lbl">Challenge code: send to a friend</div><textarea readonly>${esc(m.code)}</textarea><div class="acts"><button class="act primary" data-copy="${esc(m.code)}">📋 Copy code</button></div></div>`:''}</div></div>`}
+  function aiHTML(m,i){
+    if(m.pending)return `<div class="msg">${av()}<div class="card" style="width:auto"><div class="typing"><i></i><i></i><i></i></div></div></div>`;
+    if(m.error)return `<div class="msg">${av()}<div class="card err">${esc(m.error)}</div></div>`;
+    const d=m.data;
+    const steps=m.showSteps&&d.steps&&d.steps.length?`<div class="steps">${d.steps.map((s,k)=>`<div class="step" style="animation-delay:${k*.1}s"><div class="n" style="--sc:${COLS[k%COLS.length]}">${k+1}</div><div><b>${esc(s.title)}</b>${esc(s.explanation)}</div></div>`).join('')}</div>${d.check?`<div class="practice"><b>Try this:</b> ${esc(d.check)}</div>`:''}`:'';
+    return `<div class="msg">${av()}<div class="card">
+      <div class="lbl">${esc(T().name)} says</div>
+      <div class="ans">${nl(d.answer||'No answer found.')}</div>
+      ${d.concept?`<div class="concept"><b>The big idea:</b> ${nl(d.concept)}</div>`:''}
+      ${steps}
+      <div class="acts">
+        <button class="act primary" data-a="got" data-i="${i}" ${m.got?'disabled':''}>${m.got?'✓ Understood':'✅ I understood (+20)'}</button>
+        <button class="act" data-a="steps" data-i="${i}" ${m.showSteps?'disabled':''}>🪜 Step-by-step (+5)</button>
+        <button class="act" data-a="video" data-i="${i}">🎬 Tutor video (+15)</button>
+        <button class="act" data-a="read" data-i="${i}">🔊 Read aloud</button>
+        <button class="act" data-a="copy" data-i="${i}">📋 Copy</button>
+      </div></div></div>`;
+  }
+  function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('Copied ✓'),()=>toast('Copy not allowed here'))}catch(e){toast('Copy not allowed here')}}
+  function readAloud(t){if(!('speechSynthesis' in window))return toast('Read aloud not supported here');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}
+  function act(a,i){
+    const m=chat().msgs[i]; if(!m||!m.data)return;
+    if(a==='got'&&!m.got){m.got=true;save();award(20,'concept understood');renderChat()}
+    if(a==='steps'&&!m.showSteps){m.showSteps=true;save();award(5,'step-by-step lesson');renderChat()}
+    if(a==='video')openVideo(scenesFor(m.data),`${T().name} explains`,'answer',i);
+    if(a==='read')readAloud(`${m.data.answer}. ${m.data.concept||''}`);
+    if(a==='copy')copy(`${m.data.answer}\n\n${m.data.concept||''}`);
+  }
+
+  // ---------- AI helpers ----------
+  function parseJ(t){const c=String(t).replace(/```json|```/g,'').trim();return JSON.parse(c.slice(c.indexOf('{'),c.lastIndexOf('}')+1))}
+  function prefix(subject){
+    const p=P(),t=T(),i=p.info||{};
+    if(subject==='General')return `You are ${t.name}, a ${t.style} teacher. Answer the student's question on any topic in the world: science, history, geography, arts, sport, technology, how things work, and current events. Be accurate, and say clearly when you are not sure. Explain in ${i.lang||'English'} at a level suitable for a school student of Class ${p.cls}. Use simple words and a short example when it helps. For medical, legal or personal-safety questions, give general information and suggest asking a trusted adult or a professional. Do not give instructions for harmful, illegal or adult content. Politely suggest a safer topic instead.`;
+    return `You are ${t.name}, a ${t.style} teacher for a Class ${p.cls} student studying ${subject||p.subject} (${i.board||'CBSE (NCERT)'} board). Explain in ${i.lang||'English'}. Difficulty: ${p.diff} (${DIFF[p.diff]}). Learning style: ${i.style||'mixed'}. Main goal: ${i.goal||'understanding concepts'}. ${i.weak?'This student finds these topics hard, so explain them extra clearly: '+i.weak+'. ':''}${i.notes?'Also know: '+i.notes+'. ':''}Use simple, age-appropriate language and be accurate.`;
+  }
+  async function askJSON(prompt,img,search){
+    const res=await sample(prompt,{images:img?[img]:undefined,modelTier:'default',cache:false,search:!!search});
+    return parseJ(res.text);
+  }
+  async function genQuestions(o){ // {n,topic,paper,img,subject}
+    const p=P(), subj=o.subject||p.subject;
+    const what=o.paper
+      ?`Create a 10-question practice exam paper in NCERT style for Class ${p.cls} ${subj}${o.topic?' covering the chapter or topic: '+o.topic:' covering a mix of chapters'}. Mix recall, understanding and application.`
+      :`Create 5 multiple-choice questions for Class ${p.cls} ${subj}${o.topic?' on: '+o.topic:''}, in NCERT style.`;
+    const d=await askJSON(`${prefix(subj)}
+${o.img?'Base the questions on the topic shown in the attached photo.':''}
+${what} Each question has exactly 4 options and one correct answer.
+Return ONLY valid JSON, no markdown:
+{"topic":"short topic name","questions":[{"q":"question","options":["A","B","C","D"],"answer":0,"explain":"one-sentence reason"}]}
+"answer" is the index (0 to 3) of the correct option.`,o.img);
+    const qs=(d.questions||[]).filter(q=>q&&q.q&&Array.isArray(q.options)&&q.options.length===4&&typeof q.answer==='number'&&q.answer>=0&&q.answer<4).slice(0,o.paper?10:5);
+    if(!qs.length)throw new Error('no questions');
+    return {topic:d.topic||o.topic||'Practice',qs};
+  }
+  const encodeCode=o=>'SB1:'+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const decodeCode=s=>{const o=JSON.parse(decodeURIComponent(escape(atob(s.trim().slice(4)))));if(!o.qs||!o.qs.length)throw new Error('bad');return o};
+
+  // ---------- chat send ----------
+  function setBusy(v){busy=v;$('send').disabled=v}
+  async function send(){
+    if(busy)return;
+    const text=$('input').value.trim();
+    if(!text&&!file)return;
+    const p=P(), mode=p.mode;
+    if(mode==='challenge'&&text.startsWith('SB1:')){
+      let pl; try{pl=decodeCode(text)}catch(e){toast('That challenge code is not valid');return}
+      $('input').value='';resize();
+      openPlayer({kind:'accept',title:`⚔️ Challenge from ${pl.by}`,qs:pl.qs,topic:pl.topic,challenger:{by:pl.by,score:pl.score,total:pl.total}});
+      return;
+    }
+    const c=ensureChat();
+    const hadFile=file;
+    if(c.title==='New chat')c.title=(text||'Photo question').slice(0,40);
+    c.msgs.push({role:'user',text:text||(mode==='ask'?'Please solve the question in this photo.':'Use the topic in this photo.'),img:!!hadFile});
+    const idx=c.msgs.push({role:'ai',pending:true})-1;
+    save(); renderChat();
+    $('input').value='';resize();clearFile();
+    if(!sample){c.msgs[idx]={role:'ai',error:'The AI tutor only works when this page is opened inside claude.ai.'};save();renderChat();return}
+    setBusy(true);
+    try{
+      if(mode==='ask'){
+        const d=await askJSON(`${prefix()}
+${hadFile?'Read the question shown in the attached photo.':''}
+${text?'Student message: '+text:''}
+Return ONLY valid JSON, no markdown, with exactly these keys:
+{"question":"the question as you read it","answer":"the final answer, short and clear","concept":"the key idea in 2-3 simple sentences","steps":[{"title":"short step name","explanation":"clear explanation"}],"check":"one similar practice question"}
+Use 3 to 6 steps.`,hadFile,false);
+        c.msgs[idx]={role:'ai',data:d,got:false,showSteps:false};
+        save(); renderChat(); award(10,'question answered');
+      }else{
+        const paper=mode==='paper';
+        const data=await genQuestions({n:paper?10:5,topic:text,paper,img:hadFile});
+        const label={quiz:'Quiz',paper:'Exam paper',challenge:'Challenge'}[mode];
+        c.msgs[idx]={role:'result',title:`${label} started`,line:`${data.topic} · ${data.qs.length} questions${paper?' · 20 minutes':''}`};
+        save(); renderChat();
+        openPlayer({kind:mode,title:`${label}: ${data.topic}`,qs:data.qs,topic:data.topic,timer:paper?1200:0});
+      }
+    }catch(e){
+      c.msgs[idx]={role:'ai',error:'Sorry, I could not do that. Try again, or send a clearer photo or topic.'};
+      save(); renderChat();
+    }finally{setBusy(false)}
+  }
+
+  // ---------- player (quiz / paper / challenge / accept) ----------
+  const fmt=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  function openPlayer(o){
+    Q={kind:o.kind,title:o.title,qs:o.qs,topic:o.topic||'',timer:o.timer||0,left:o.timer||0,i:0,picks:{},done:false,challenger:o.challenger||null};
+    $('pTitle').textContent=o.title;
+    $('playerM').classList.add('on');
+    clearInterval(qTick);
+    if(Q.timer){qTick=setInterval(()=>{Q.left--;paintTimer();if(Q.left<=0){clearInterval(qTick);finish()}},1000)}
+    paintTimer();paintQ();
+  }
+  function closePlayer(){clearInterval(qTick);Q=null;$('playerM').classList.remove('on');renderAll()}
+  $('pX').onclick=()=>{if(Q&&!Q.done&&!confirm('Leave now? This test will not be scored.'))return;closePlayer()};
+  function paintTimer(){const el=$('pTimer');if(Q&&Q.timer){el.classList.remove('hidden');el.textContent='⏱ '+fmt(Math.max(0,Q.left))}else el.classList.add('hidden')}
+  function paintQ(){
+    if(!Q||Q.done)return;
+    const n=Q.qs.length,q=Q.qs[Q.i];
+    $('pBody').innerHTML=`<div class="pbar"><div style="width:${((Q.i+1)/n)*100}%"></div></div>
+      <div class="qn">Question ${Q.i+1} of ${n}</div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="opts">${q.options.map((o,j)=>`<button class="opt ${Q.picks[Q.i]===j?'sel':''}" data-j="${j}"><span class="ol">${String.fromCharCode(65+j)}</span>${esc(o)}</button>`).join('')}</div>
+      <div class="pnav"><button class="ghostbtn" id="pPrev" ${Q.i===0?'disabled':''}>← Back</button>
+        ${Q.i<n-1?'<button class="big" id="pNext">Next →</button>':'<button class="big good" id="pSubmit">Submit ✓</button>'}</div>`;
+    $('pBody').querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{Q.picks[Q.i]=+b.dataset.j;paintQ()});
+    const pv=$('pPrev');if(pv)pv.onclick=()=>{Q.i--;paintQ()};
+    const nx=$('pNext');if(nx)nx.onclick=()=>{Q.i++;paintQ()};
+    const sb=$('pSubmit');if(sb)sb.onclick=()=>{const left=Q.qs.length-Object.keys(Q.picks).length;if(left>0&&!confirm(`${left} question(s) unanswered. Submit anyway?`))return;finish()};
+  }
+  function finish(){
+    if(!Q||Q.done)return;
+    Q.done=true;clearInterval(qTick);paintTimer();
+    const qs=Q.qs,n=qs.length,p=P();
+    const score=qs.reduce((s,q,k)=>s+(Q.picks[k]===q.answer?1:0),0);
+    const pct=Math.round(score/n*100);
+    p.quizzes++;
+    let pts,grade,vs='',code='';
+    if(Q.kind==='paper'){pts=score*2+(pct>=90?15:0);grade=pct>=90?'🏆 Topper level! Outstanding.':pct>=75?'🌟 Excellent work.':pct>=50?'👍 Good, keep practising.':'💪 Revise this chapter and try again.'}
+    else if(Q.kind==='accept'){const c=Q.challenger;pts=score*5+(score>c.score?20:0);vs=score>c.score?`🏆 You beat ${esc(c.by)}!`:score===c.score?`🤝 A tie with ${esc(c.by)}!`:`😅 ${esc(c.by)} wins this round. Rematch?`;grade=''}
+    else{pts=score*5+(score===n?10:0);grade=pct>=80?'🎉 Great work!':'👍 Keep practising.'}
+    const c=chat();
+    if(Q.kind==='challenge'){
+      code=encodeCode({v:1,by:p.name,topic:Q.topic,qs,score,total:n});
+      if(c)c.msgs.push({role:'result',title:'Challenge ready',line:`You scored ${score}/${n} on ${Q.topic}. Share the code with a friend!`,code});
+    }else if(Q.kind!=='accept'){
+      if(c)c.msgs.push({role:'result',title:Q.kind==='paper'?'Exam paper result':'Quiz result',line:`${score}/${n} (${pct}%) on ${Q.topic}`});
+    }
+    save();
+    P().mistakes=(P().mistakes||[]).filter(m=>!qs.some(q=>q.q===m.q)).concat(qs.filter((q,k)=>Q.picks[k]!==q.answer).map(q=>({q:q.q,options:q.options,answer:q.answer,explain:q.explain,topic:Q.topic}))).slice(-200);
+    save();
+    award(pts,`${score} correct`);
+    $('pBody').innerHTML=`<div class="res"><div class="bigscore">${score}/${n}</div><div class="muted">${pct}% ${grade?'· '+grade:''}</div>
+      ${vs?`<div class="vs">${vs}</div>`:''}<span class="ptsearn">+${pts} pts</span></div>
+      <div class="rev">${qs.map((q,k)=>`<div class="rq ${Q.picks[k]===q.answer?'okr':''}"><b>${k+1}. ${esc(q.q)}</b><div>Your answer: ${Q.picks[k]===undefined?'—':esc(q.options[Q.picks[k]])}</div><div>Correct: <b>${esc(q.options[q.answer])}</b></div><div class="expl">💡 ${esc(q.explain||'')}</div></div>`).join('')}</div>
+      ${code?`<div class="codebox"><div class="lbl">Challenge code: send this to your friend</div><textarea readonly>${esc(code)}</textarea><div class="acts"><button class="act primary" id="cpy">📋 Copy code</button></div></div>`:''}
+      <div class="frow"><button class="big" id="pDone">Done</button></div>`;
+    $('pDone').onclick=closePlayer;
+    if(code)$('cpy').onclick=()=>copy(code);
+  }
+
+  // ---------- books: chapters, notes, sample papers, video ----------
+  const bookKey=()=>`${P().cls}|${P().bookSubj||P().subject}`;
+  async function loadChapters(force){
+    const p=P(), subj=p.bookSubj||p.subject;
+    p.books=p.books||{};
+    const k=`${p.cls}|${subj}`;
+    const off=await window.syllabusGet(p.cls,subj);
+    if(p.books[k]&&!force&&(!off||p.books[k].src==='syllabus')){paintBooks();return}
+    if(!sample){paintBooks(null,'The AI tutor only works when this page is opened inside claude.ai.');return}
+    paintBooks(null,'loading');
+    try{
+      const d=off?{chapters:off}:await askJSON(`${prefix(subj)}
+List the chapters for a Class ${p.cls} ${subj} book following the NCERT syllabus. If you are unsure of exact titles, give the commonly used chapter titles.
+Return ONLY valid JSON, no markdown: {"chapters":["Chapter title 1","Chapter title 2"]}
+Give between 8 and 20 chapters, in order.`);
+      const list=(d.chapters||[]).filter(Boolean).slice(0,25);
+      p.books[k]={chapters:list,custom:(p.books[k]&&p.books[k].custom)||[],src:off?'syllabus':'ai'};
+      save(); paintBooks();
+    }catch(e){paintBooks(null,'Could not load chapters. Try again.')}
+  }
+  function paintBooks(_,status){
+    const p=P(), subj=p.bookSubj||p.subject, k=`${p.cls}|${subj}`;
+    const subs=(INFO().subjects&&INFO().subjects.length)?INFO().subjects:SUBJECTS;
+    const data=p.books&&p.books[k];
+    const all=data?[...data.chapters,...(data.custom||[])]:[];
+    const cols=COLS;
+    $('wrap').innerHTML=`<div class="toolbar">
+        <select id="bSubj">${subs.map(s=>`<option ${s===subj?'selected':''}>${esc(s)}</option>`).join('')}</select>
+        <button class="act" id="bReload">↻ Refresh chapters</button>
+        <span class="muted">Class ${esc(p.cls)} · ${esc(INFO().board||'CBSE (NCERT)')}</span>
+      </div>
+      <div class="card" style="border-top-color:var(--a2)"><div class="lbl">Not in the list?</div>
+        <div class="toolbar"><input id="bCustom" placeholder="Type a chapter name from your book" style="flex:1;min-width:200px"><button class="act primary" id="bAdd">＋ Add chapter</button></div>
+      </div>
+      ${status&&status!=='loading'?`<div class="card err">${esc(status)}</div>`:''}
+      ${status==='loading'?`<div class="card"><div class="typing"><i></i><i></i><i></i></div> Loading chapters…</div>`:''}
+      <div class="chgrid">${all.map((c,i)=>`<button class="chcard" style="--cc:${cols[i%cols.length]}" data-ch="${i}"><span class="no">Chapter ${i+1}</span><b>${esc(c)}</b><span class="muted">Notes · Sample paper · Video · Solve exercise</span></button>`).join('')}</div>
+      ${!all.length&&status!=='loading'?`<div class="empty muted" style="text-align:center;padding:20px">Choose a subject to load the chapters.</div>`:''}
+      <div class="muted" style="font-size:12px">Chapter titles are AI-suggested. Match them with your book's contents page.</div>`;
+    $('bSubj').onchange=e=>{p.bookSubj=e.target.value;save();loadChapters(false)};
+    $('bReload').onclick=()=>loadChapters(true);
+    $('bAdd').onclick=()=>{const v=$('bCustom').value.trim();if(!v)return;p.books=p.books||{};p.books[k]=p.books[k]||{chapters:[],custom:[]};p.books[k].custom=p.books[k].custom||[];p.books[k].custom.push(v);save();paintBooks()};
+    $('wrap').querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>openChapter(all[+b.dataset.ch],subj));
+    if(!data&&!status&&sample)loadChapters(false);
+  }
+  let curCh=null;
+  function openChapter(ch,subj){
+    curCh={name:ch,subj};
+    $('chTitle').textContent=`${ch} · ${subj}`;
+    $('chActs').innerHTML=`<button class="act primary" data-x="notes">📝 Notes</button><button class="act" data-x="paper">🏅 Sample paper (10 Q)</button><button class="act" data-x="video">🎬 Animated video</button><button class="act" data-x="cards">🃏 Flashcards</button><button class="act" data-x="solve">✍️ Solve an exercise</button>`;
+    $('chOut').innerHTML=`<div class="muted">Pick what you need for this chapter.</div>`;
+    $('chActs').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>chAct(b.dataset.x));
+    $('chapM').classList.add('on');
+  }
+  $('chX').onclick=()=>$('chapM').classList.remove('on');
+  async function chAct(x){
+    const {name,subj}=curCh, out=$('chOut');
+    if(x==='solve'){
+      $('chapM').classList.remove('on');
+      P().view='chat'; const c=ensureChat(); save(); renderAll();
+      P().mode='ask'; save(); paintMode();
+      $('input').value=`From ${subj}, ${name}: solve this exercise question step by step. `;
+      resize(); $('input').focus(); return;
+    }
+    if(!sample){out.innerHTML=`<div class="card err">The AI tutor only works inside claude.ai.</div>`;return}
+    out.innerHTML=`<div class="typing"><i></i><i></i><i></i></div>`;
+    try{
+      if(x==='cards'){
+        const d=(await window.packGet('notes',name,subj,P().cls))||await askJSON(`${prefix(subj)}
+Make 8 flashcards for the chapter "${name}" of Class ${P().cls} ${subj}. Each card has a short question (front) and a clear answer (back).
+Return ONLY valid JSON, no markdown: {"cards":[{"front":"","back":""}]}`);
+        const cards=(d.cards||(d.terms||[]).map(t=>({front:t.term,back:t.meaning}))).filter(c=>c.front);
+        out.innerHTML=`<div class="card" style="border-top-color:var(--a2)"><div class="lbl">Flashcards · tap to reveal</div>${cards.map(c=>`<details class="fc"><summary>${esc(c.front)}</summary><div>${esc(c.back)}</div></details>`).join('')||'<span class="muted">No cards yet.</span>'}</div>`;
+        award(5,'flashcards studied');
+      }else if(x==='notes'){
+        const d=(await window.packGet('notes',name,subj,P().cls))||await askJSON(`${prefix(subj)}
+Write concise revision notes for the chapter "${name}" of Class ${P().cls} ${subj}.
+Return ONLY valid JSON, no markdown: {"notes":["key point","key point"],"terms":[{"term":"","meaning":""}]}
+Give 6 to 10 key points and 4 to 8 important terms.`);
+        out.innerHTML=`<div class="card" style="border-top-color:var(--a2)"><div class="lbl">Key points</div><ul class="notes">${(d.notes||[]).map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
+          <div class="lbl" style="margin-top:12px">Important terms</div>${(d.terms||[]).map(t=>`<div class="term"><b>${esc(t.term)}</b><span>${esc(t.meaning)}</span></div>`).join('')}</div>`;
+        award(5,'notes read');
+      }else if(x==='paper'){
+        const data=(await window.packGet('paper',name,subj,P().cls))||await genQuestions({n:10,topic:name,paper:true,subject:subj});
+        out.innerHTML='';
+        curCh=null; $('chapM').classList.remove('on');
+        openPlayer({kind:'paper',title:`Sample paper: ${name}`,qs:data.qs,topic:name,timer:1200});
+      }else if(x==='video'){
+        const d=await askJSON(`${prefix(subj)}
+Make a short animated video lesson on the chapter "${name}" for Class ${P().cls} ${subj}.
+Return ONLY valid JSON, no markdown:
+{"title":"video title","scenes":[{"heading":"short heading","text":"2 to 3 narrated sentences","emoji":"one relevant emoji"}]}
+Make 6 scenes: intro, 3 key ideas, a worked example, and a recap.`);
+        const scenes=(d.scenes||[]).filter(s=>s&&s.text).map((s,k)=>({num:`Scene ${k+1} of ${d.scenes.length}`,title:s.heading||'',text:s.text,emoji:s.emoji||EMO[k%EMO.length]}));
+        if(!scenes.length)throw new Error('no scenes');
+        out.innerHTML='';
+        openVideo(scenes,`${T().name} presents`,'chapter:'+name,-1);
+      }
+    }catch(e){out.innerHTML=`<div class="card err">Sorry, that did not work. Please try again.</div>`}
+  }
+
+  // ---------- study plan ----------
+  async function paintPlan(){
+    const p=P(), i=p.info||{};
+    if(p.plan){
+      $('wrap').innerHTML=`<div class="toolbar"><div class="lbl" style="margin:0">Your 7-day plan</div><span class="muted">${esc(i.mins||'40')} min a day · target ${esc(i.target||'75')}%${i.examDate?' · exam '+esc(i.examDate):''}</span><button class="act" id="pRegen" style="margin-left:auto">↻ Make a new plan</button></div>
+        <div class="plan">${p.plan.days.map((d,k)=>`<div class="day" style="--dc:${COLS[k%COLS.length]}"><b>${esc(d.day)}</b> <span class="muted">· ${esc(d.minutes||i.mins||'')} min</span><div style="font-weight:700;margin-top:4px">${esc(d.focus)}</div><ul>${(d.tasks||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}</div>
+        ${p.plan.tips&&p.plan.tips.length?`<div class="card" style="border-top-color:var(--a2)"><div class="lbl">Tips for ${esc(p.name)}</div><ul class="notes">${p.plan.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:''}`;
+      $('pRegen').onclick=()=>makePlan();
+    }else{
+      $('wrap').innerHTML=`<div class="hero"><h1>Your study plan</h1><p>A 7-day plan built from ${esc(p.name)}'s subjects, goal, study time, and weak topics.</p>
+        <div class="chips"><button class="chip" style="--cc:var(--tc)" id="pMake">✨ Create my plan</button></div></div>`;
+      $('pMake').onclick=()=>makePlan();
+    }
+  }
+  async function makePlan(){
+    const p=P(), i=p.info||{};
+    if(!sample){toast('The AI tutor only works inside claude.ai');return}
+    $('wrap').innerHTML=`<div class="card"><div class="typing"><i></i><i></i><i></i></div> Building ${esc(p.name)}'s plan…</div>`;
+    try{
+      const d=await askJSON(`${prefix()}
+Make a 7-day study plan for this student.
+Subjects: ${(i.subjects||[p.subject]).join(', ')}. Study time each day: ${i.mins||40} minutes. Target score: ${i.target||75}%. Exam date: ${i.examDate||'not set'}. Main goal: ${i.goal||'understanding'}. Hard topics: ${i.weak||'none named'}. Learning style: ${i.style||'mixed'}.
+Give more time to the hard topics. Use simple tasks, such as reading a chapter, making notes, a sample paper, or a video.
+Return ONLY valid JSON, no markdown:
+{"days":[{"day":"Mon","focus":"subject and topic","minutes":40,"tasks":["task","task","task"]}],"tips":["tip","tip"]}
+Use exactly 7 days, Mon to Sun.`);
+      p.plan={days:(d.days||[]).slice(0,7),tips:(d.tips||[]).slice(0,5),made:today()};
+      if(!p.plan.days.length)throw new Error('empty');
+      save(); award(5,'study plan created'); paintPlan();
+    }catch(e){$('wrap').innerHTML=`<div class="card err">Could not create the plan. <button class="act" id="pTry">Try again</button></div>`;$('pTry').onclick=()=>makePlan()}
+  }
+
+  // ---------- animated video player ----------
+  const V={scenes:[],i:0,playing:false,timer:null,awarded:false,key:null,idx:-1};
+  function scenesFor(d){
+    const s=[{num:'Question',title:"Let's look at this",text:d.question||'',emoji:'❓'},{num:'The big idea',title:'Key concept',text:d.concept||'',emoji:'💡'}];
+    (d.steps||[]).forEach((x,k)=>s.push({num:`Step ${k+1} of ${d.steps.length}`,title:x.title,text:x.explanation,emoji:EMO[(k+2)%EMO.length]}));
+    s.push({num:'Answer',title:'So the answer is',text:d.answer||'',emoji:'🏁'});
+    s.push({num:'Your turn',title:'Practice',text:d.check||'Try a similar question on your own!',emoji:'✍️'});
+    return s.filter(x=>x.text||x.title);
+  }
+  function openVideo(scenes,who,key,msgIdx){
+    const t=T();
+    $('vstage').style.setProperty('--tc',t.color);
+    $('tutorEmo').textContent=t.emoji;
+    $('vHead').textContent=`🎬 ${who}`;
+    const dots=$('vdots');dots.innerHTML=Array.from({length:12},(_,k)=>`<span style="left:${(k*83)%100}%;animation-delay:${(k*0.7).toFixed(1)}s;animation-duration:${6+(k%4)}s;width:${6+(k%3)*5}px;height:${6+(k%3)*5}px"></span>`).join('');
+    V.scenes=scenes;V.i=0;V.key=key;V.idx=msgIdx;
+    V.awarded=key.startsWith('answer')&&chat()&&chat().msgs[msgIdx]&&chat().msgs[msgIdx].videoDone;
+    $('vidM').classList.add('on');showScene();
+  }
+  function showScene(){
+    const s=V.scenes[V.i];
+    $('scene').innerHTML=`<div class="scene" style="display:flex"><div class="bigemo">${esc(s.emoji||'🎯')}</div><div class="vtxt"><div class="num">${esc(s.num)}</div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`;
+    $('vprog').style.width=`${((V.i+1)/V.scenes.length)*100}%`;
+  }
+  function speak(t){
+    if(!('speechSynthesis' in window))return false;
+    try{const u=new SpeechSynthesisUtterance(t);u.rate=.95;u.onend=()=>{if(V.playing){clearTimeout(V.timer);advance()}};speechSynthesis.cancel();speechSynthesis.speak(u);return true}catch(e){return false}
+  }
+  function run(){
+    const tok=++vTok;clearTimeout(V.timer);showScene();
+    const s=V.scenes[V.i];
+    const sp=speak(`${s.title}. ${s.text}`);
+    const dur=Math.max(6000,(s.text.length+s.title.length)*75);
+    V.timer=setTimeout(()=>{if(tok===vTok)advance()},sp?dur+4000:dur);
+  }
+  function advance(){
+    if(V.i<V.scenes.length-1){V.i++;V.playing?run():showScene();return}
+    V.playing=false;clearTimeout(V.timer);$('vPlay').textContent='▶ Play';
+    if(!V.awarded){
+      V.awarded=true;
+      if(V.key.startsWith('answer')){const c=chat();if(c&&c.msgs[V.idx]){c.msgs[V.idx].videoDone=true;save()}}
+      award(15,'video finished');
+    }
+  }
+  function stopV(){V.playing=false;vTok++;clearTimeout(V.timer);if('speechSynthesis' in window)speechSynthesis.cancel();$('vPlay').textContent='▶ Play'}
+  $('vPlay').onclick=()=>{
+    if(V.playing){stopV();return}
+    if(V.i>=V.scenes.length-1&&V.awarded)V.i=0;
+    V.playing=true;$('vPlay').textContent='⏸ Pause';run();
+  };
+  $('vNext').onclick=()=>{stopV();if(V.i<V.scenes.length-1){V.i++;showScene()}else advance()};
+  $('vPrev').onclick=()=>{stopV();if(V.i>0)V.i--;showScene()};
+  $('vRestart').onclick=()=>{stopV();V.i=0;showScene()};
+  $('vClose').onclick=()=>{stopV();$('vidM').classList.remove('on')};
+
+  // ---------- rendering dispatcher ----------
+  function renderAll(){
+    if(!P())return;
+    renderSide();renderPoints();paintMode();
+    const v=P().view;
+    if(v==='chat')renderChat();
+    else if(v==='books'){if(!P().bookSubj)P().bookSubj=P().subject;paintBooks()}
+    else if(v==='plan')paintPlan();
+    else if(v==='review')paintReview();
+  }
+  function setView(v){P().view=v;save();renderAll();closeSide()}
+  document.querySelectorAll('.navs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+
+  // ---------- composer & sidebar ----------
+  $('newChat').onclick=newChat;
+  $('search').oninput=e=>{searchQ=e.target.value;renderSide()};
+  document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{P().diff=b.dataset.d;save();renderSide()});
+  document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{P().mode=b.dataset.m;save();paintMode()});
+  const input=$('input');
+  function resize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,140)+'px'}
+  input.addEventListener('input',resize);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  $('send').onclick=send;
+  $('attach').onclick=()=>$('file').click();
+  $('file').onchange=e=>{file=e.target.files[0]||null;if(!file)return;$('prevImg').src=URL.createObjectURL(file);$('prevName').textContent=file.name;$('prev').classList.add('on')};
+  function clearFile(){file=null;$('file').value='';$('prev').classList.remove('on')}
+  $('prevX').onclick=clearFile;
+  $('menuBtn').onclick=()=>{$('side').classList.add('open');$('scrim').classList.add('on')};
+  function closeSide(){$('side').classList.remove('open');$('scrim').classList.remove('on')}
+  $('scrim').onclick=closeSide;
+  $('helpBtn').onclick=()=>$('helpM').classList.add('on');
+  $('helpX').onclick=()=>$('helpM').classList.remove('on');
+
+  // ---------- focus timer ----------
+  let FT=null, fLeft=25*60;
+  const paintFocus=()=>{$('focusTime').textContent=fmt(fLeft)};
+  function stopFocus(){clearInterval(FT);FT=null}
+  $('focusBtn').onclick=()=>{$('focusM').classList.add('on');paintFocus()};
+  $('focusX').onclick=()=>{stopFocus();$('focusM').classList.remove('on')};
+  $('focusStart').onclick=()=>{
+    if(FT)return;
+    FT=setInterval(()=>{
+      fLeft--; paintFocus();
+      if(fLeft<=0){
+        stopFocus(); fLeft=25*60; paintFocus();
+        const p=P(), t=today(); p.focus=p.focus&&p.focus.day===t?p.focus:{day:t,n:0};
+        if(p.focus.n<3){p.focus.n++;save();award(10,'focus session completed')}
+        else toast('Focus session done. Daily focus points are used up, but well done!');
+      }
+    },1000);
+  };
+  $('focusStop').onclick=()=>{stopFocus();fLeft=25*60;paintFocus()};
+
+  // ---------- mistake review ----------
+  function paintReview(){
+    const p=P(), ms=p.mistakes||[];
+    $('wrap').innerHTML=`<div class="hero"><h1>🧠 Review mistakes</h1>
+      <p>Questions you get wrong in quizzes and papers are saved here. Practise them until they are right, and they leave the list.</p>
+      <div class="chips"><button class="chip" style="--cc:var(--tc)" id="rvGo" ${ms.length?'':'disabled'}>🔁 Practise ${Math.min(10,ms.length)} of ${ms.length} saved</button><button class="chip" id="rvClear">🗑 Clear all</button></div></div>
+      <div class="card">${ms.slice().reverse().map(m=>`<div class="rq"><b>${esc(m.q)}</b><div>Correct: <b>${esc(m.options[m.answer])}</b></div><div class="expl">${esc(m.topic||'')}${m.explain?' · '+esc(m.explain):''}</div></div>`).join('')||'<span class="muted">No mistakes saved yet. Take a quiz or an exam paper to start.</span>'}</div>`;
+    if($('rvGo'))$('rvGo').onclick=()=>{
+      const qs=ms.slice().sort(()=>Math.random()-.5).slice(0,10);
+      openPlayer({kind:'quiz',title:'Review: my mistakes',qs,topic:'My mistakes'});
+    };
+    if($('rvClear'))$('rvClear').onclick=()=>{if(confirm('Clear all saved mistakes?')){p.mistakes=[];save();paintReview()}};
+  }
+
+  // ---------- voice ----------
+  function wireMic(){
+    if(!dict)return;
+    $('mic').classList.remove('hidden');
+    let base='';
+    dict.onPartial(({text})=>{input.value=(base+' '+text).trim();resize()});
+    dict.onFinal(({text})=>{base=(base+' '+text).trim();input.value=base;resize()});
+    dict.onState(({state})=>{$('mic').classList.toggle('rec',state==='listening');if(state==='listening')base=input.value.trim()});
+    $('mic').onclick=()=>{if($('mic').classList.contains('rec')){dict.stop();return}dict.start().catch(()=>toast('Microphone not available'))};
+  }
+
+  // ---------- init ----------
+  if(P()){
+    if(!P().cur&&P().chats.length)P().cur=P().chats[0].id;
+    renderAll();
+  }else{
+    openWizard(null);
+  }
+  (async()=>{
+    try{if(window.claude&&window.claude.use)sample=await window.claude.use('sample')}catch(e){sample=null}
+    try{if(window.claude&&window.claude.use)dict=await window.claude.use('dictation')}catch(e){dict=null}
+    wireMic();
+  })();
+})();
+</script>
+</body>
+</html>

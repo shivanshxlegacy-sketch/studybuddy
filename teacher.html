@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teacher dashboard · StudyBuddy</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#fdf7ff;color:#1e1b3a;margin:0;padding:24px}
+.wrap{max-width:900px;margin:0 auto}
+.card{background:#fff;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 4px 14px #0001}
+h1{margin:0 0 14px}
+input{padding:10px;border:1px solid #ddd;border-radius:10px;font-size:15px}
+button{padding:10px 16px;border:0;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700;cursor:pointer}
+.cls{display:inline-block;margin:4px;padding:8px 12px;border-radius:10px;background:#f3efff;border:1px solid #d9d0ff;color:#1e1b3a;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid #eee}
+.muted{color:#6b6f8a;font-size:13px}
+.err{color:#dc2626}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>👩‍🏫 Teacher dashboard</h1>
+  <div class="card" id="msg" style="display:none"></div>
+  <div class="card">
+    <b>Your classes</b>
+    <div id="classes" style="margin:10px 0"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="newName" placeholder="New class name, e.g. Class 6A Maths" style="flex:1;min-width:200px">
+      <button id="create">Create class</button>
+    </div>
+    <p class="muted">Share the class code with students. They enter it when they sign up.</p>
+  </div>
+  <div class="card" id="detail" style="display:none"></div>
+  <div class="muted">Students’ chats and photos are never shown here. Only summary numbers are.</div>
+</div>
+<script>
+  const token = localStorage.getItem('sb_access_token');
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if (!token) location.href = '/login';
+
+  async function api(path, opts = {}) {
+    const r = await fetch(path, { ...opts, headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token } });
+    if (r.status === 401) { location.href = '/login'; throw new Error('login'); }
+    if (r.status === 403) { $('msg').style.display = 'block'; $('msg').innerHTML = '<span class="err">This account is not a teacher account. Ask StudyBuddy support to enable it.</span>'; throw new Error('not_teacher'); }
+    if (!r.ok) throw new Error('error');
+    return r.json();
+  }
+  async function loadClasses() {
+    const { classes } = await api('/api/teacher/classes');
+    $('classes').innerHTML = classes.map(c => `<button class="cls" data-id="${c.id}">${esc(c.name)} · code <b>${esc(c.code)}</b></button>`).join('') || '<span class="muted">No classes yet.</span>';
+    $('classes').querySelectorAll('[data-id]').forEach(b => b.onclick = () => showClass(b.dataset.id));
+  }
+  async function showClass(id) {
+    const { class: c, students } = await api('/api/teacher/classes/' + id);
+    $('detail').style.display = 'block';
+    $('detail').innerHTML = `<b>${esc(c.name)}</b> <span class="muted">· code ${esc(c.code)} · ${students.length} student(s)</span>
+      <table style="margin-top:10px"><thead><tr><th>Student</th><th>Class</th><th>Points</th><th>Tests</th><th>Streak</th><th>Last active</th></tr></thead>
+      <tbody>${students.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.cls)}</td><td>${s.points}</td><td>${s.quizzes}</td><td>${s.streak} days</td><td>${esc(s.last_active || '—')}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No students have joined yet.</td></tr>'}</tbody></table>`;
+  }
+  $('create').onclick = async () => {
+    const name = $('newName').value.trim();
+    if (!name) return;
+    await api('/api/teacher/classes', { method: 'POST', body: JSON.stringify({ name }) });
+    $('newName').value = '';
+    loadClasses();
+  };
+  loadClasses().catch(() => {});
+</script>
+</body>
+</html>
